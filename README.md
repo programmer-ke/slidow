@@ -20,3 +20,7 @@ Virtual interactions
 - Closes quiz
 - Reveals leaderboard
 - Closes event
+
+# Todo
+
+- add black + mypy

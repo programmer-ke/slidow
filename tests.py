@@ -1,5 +1,4 @@
 import unittest
-
 import slide_ow
 
 
@@ -15,12 +14,32 @@ class EventTestCase(unittest.TestCase):
         self.assertFalse(event1 == event2)
         self.assertFalse(event1 is event2)
 
+    def test_can_add_quizes_to_event(self):
+        title = "warmup quiz"
+        quiz = slide_ow.Quiz(title=title)
+
+        event = slide_ow.Event(name="foo")
+        event.quiz = quiz
+        self.assertTrue(event.quiz is quiz)
+
+
 
 class QuizTestCase(unittest.TestCase):
     def test_can_create_quiz(self):
         title = "warmup quiz"
         quiz = slide_ow.Quiz(title=title)
         self.assertEqual(title, quiz.title)
+
+    def test_can_add_questions_to_quiz(self):
+        title = "warmup quiz"
+        quiz = slide_ow.Quiz(title=title)
+        self.assertTrue(quiz.questions is None)
+        question1 = slide_ow.Question(text="What is trending most on X?")
+        question2 = slide_ow.Question(text="Who is the best movie of all time?")
+
+        quiz.questions = [question1, question2]
+        self.assertEqual(quiz.questions, [question1, question2])
+        
 
 class QuestionTestCase(unittest.TestCase):
     def test_can_create_question(self):
@@ -34,9 +53,13 @@ class QuestionTestCase(unittest.TestCase):
 
         option1 = slide_ow.Option(text="Bitcoin ETF")
         option2 = slide_ow.Option(text="Elon Musk")
-        question.add_option()
-        options = question.options
-        self.assertEqual(option, [option1, option2])
+        question.options = [option1, option2]
+        self.assertEqual(question.options, [option1, option2])
+
+    def test_no_options_empty_list(self):
+        text = "What is trending most on X?"
+        question = slide_ow.Question(text=text)
+        self.assertTrue(question.options is None)
 
 class OptionTestCase(unittest.TestCase):
     def test_can_create_question_option(self):
