@@ -23,4 +23,5 @@ Virtual interactions
 
 # Todo
 
-- add black + mypy
+- [x] add black + mypy
+- [x] figure out mypy and tests setup 

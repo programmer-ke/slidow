@@ -1,22 +1,28 @@
-"""The slide-ow app domain"""
+"""The domain model"""
+
+import typing
 from dataclasses import dataclass
 
 
+@dataclass
 class Event:
-    def __init__(self, name: str):
-        self.name = name
+    name: str
+    quiz: typing.Optional["Quiz"] = None
+
+    def __eq__(self, other: 'Event'):
+        return self is other
 
 
 @dataclass
 class Quiz:
     title: str
-    questions: list = None
+    questions: list["Question"] | None = None
 
 
 @dataclass
 class Question:
     text: str
-    options: list = None
+    options: list["Option"] | None = None
 
 
 @dataclass
