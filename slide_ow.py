@@ -4,13 +4,16 @@ import typing
 from dataclasses import dataclass
 
 
-@dataclass
 class Event:
-    name: str
-    quiz: typing.Optional["Quiz"] = None
+    def __init__(self, identifier: str, name: str) -> None:
+        self.identifier = identifier
+        self.name = name
+        self.quizzes : list['Quiz'] = []
 
-    def __eq__(self, other: 'Event'):
-        return self is other
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Event):
+            return False
+        return self.identifier == other.identifier
 
 
 @dataclass

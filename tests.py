@@ -4,24 +4,27 @@ import slide_ow
 
 class EventTestCase(unittest.TestCase):
     def test_can_create_event(self):
-        event = slide_ow.Event(name="foo")
-        self.assertTrue(event.name, "foo")
+        event = slide_ow.Event(name="foo", identifier="event1")
+        self.assertTrue((event.identifier, event.name), ("event1", "foo"))
 
     def test_two_events_with_same_name_are_different(self):
-        event1 = slide_ow.Event(name="foo")
-        event2 = slide_ow.Event(name="foo")
+        event1 = slide_ow.Event("event1", "foo")
+        event2 = slide_ow.Event("event2", "foo")
 
         self.assertFalse(event1 == event2)
-        self.assertFalse(event1 is event2)
         self.assertTrue(event1 == event1)
 
-    def test_can_add_quizes_to_event(self):
-        title = "warmup quiz"
-        quiz = slide_ow.Quiz(title=title)
+    def test_two_events_with_same_id_are_same(self):
+        event1 = slide_ow.Event("event1", "foo")
+        event2 = slide_ow.Event("event1", "foo")
 
-        event = slide_ow.Event(name="foo")
-        event.quiz = quiz
-        self.assertTrue(event.quiz is quiz)
+        self.assertTrue(event1 == event2)
+
+    def test_event_initialized_with_no_quizzes(self):
+        id_, title = "event1", "warmup quiz"
+        event = slide_ow.Event(id_, title)
+
+        self.assertEqual(event.quizzes, [])
 
 
 class QuizTestCase(unittest.TestCase):
@@ -72,6 +75,17 @@ class OptionTestCase(unittest.TestCase):
         option = slide_ow.Option(text="Bitcoin ETF", correct=True)
         self.assertTrue(option.correct)
 
+
+#class RepositoryTestCase(unittest.TestCase):
+#
+#    def test_can_save_an_event(self):
+#        key_value_store = {}
+#        repo = repository.EventKeyValueRepo(key_value_store)
+#
+#        repo.add(slide_ow.Event(name="Friday Hangout"))
+#        
+#        events = key_value_store["events"]
+#        self.assertEqual()
 
 if __name__ == "__main__":
     unittest.main()
