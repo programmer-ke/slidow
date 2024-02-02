@@ -1,4 +1,7 @@
-"""Repositories module"""
+"""Repositories module
+
+TODO: Consider some refactoring and use of the protocol type for repos
+"""
 
 import slidow
 
