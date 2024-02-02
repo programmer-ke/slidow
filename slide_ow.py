@@ -8,7 +8,7 @@ class Event:
     def __init__(self, identifier: str, name: str) -> None:
         self.identifier = identifier
         self.name = name
-        self.quizzes : list['Quiz'] = []
+        self.quizzes: list["Quiz"] = []
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Event):
@@ -19,13 +19,13 @@ class Event:
 @dataclass
 class Quiz:
     title: str
-    questions: list["Question"] | None = None
+    questions: list["Question"]
 
 
 @dataclass
 class Question:
     text: str
-    options: list["Option"] | None = None
+    options: list["Option"]
 
 
 @dataclass
