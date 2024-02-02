@@ -18,8 +18,14 @@ class Event:
 
 @dataclass
 class Quiz:
+    identifier: str
     title: str
     questions: list["Question"]
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Quiz):
+            return False
+        return self.identifier == other.identifier
 
 
 @dataclass

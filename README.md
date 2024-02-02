@@ -1,4 +1,4 @@
-# slide-ow
+# slidow
 
 Virtual interactions
 
@@ -25,4 +25,4 @@ Virtual interactions
 
 - [x] add black + mypy
 - [x] figure out mypy and tests setup 
-- [ ] modify domain to have non-optional child attributes
+- [x] modify domain to have non-optional child attributes
