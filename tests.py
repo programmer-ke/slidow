@@ -1,6 +1,6 @@
 import unittest
 
-import repos
+import adapters
 import slidow
 
 
@@ -47,6 +47,9 @@ class QuizTestCase(unittest.TestCase):
         quiz.questions.append(question2)
         self.assertEqual(quiz.questions, [question1, question2])
 
+
+class QuestionTestCase(unittest.TestCase):
+
     def test_can_create_question_with_options(self):
         text = "What is trending most on X?"
         option1 = slidow.Option(text="Bitcoin ETF")
@@ -58,6 +61,9 @@ class QuizTestCase(unittest.TestCase):
         text = "What is trending most on X?"
         with self.assertRaises(TypeError):
             question = slidow.Question(text=text)  # type: ignore[call-arg]
+
+
+class OptionTestCase(unittest.TestCase):
 
     def test_can_create_question_option(self):
         text = "Bitcoin ETF"
@@ -74,7 +80,7 @@ class RepositoryTestCase(unittest.TestCase):
 
     def test_can_save_an_event(self):
         key_value_store: dict[str, dict] = {}
-        repo = repos.EventKeyValRepo(key_value_store)
+        repo = adapters.EventKeyValRepo(key_value_store)
         event = slidow.Event("event1", "Friday Hangout")
 
         repo.add(event)
@@ -87,7 +93,7 @@ class RepositoryTestCase(unittest.TestCase):
 
         key_value_store: dict[str, dict] = {"events": {"event1": event}}
 
-        repo = repos.EventKeyValRepo(key_value_store)
+        repo = adapters.EventKeyValRepo(key_value_store)
         retrieved_event = repo.get("event1")
 
         self.assertEqual(retrieved_event, event)
@@ -101,7 +107,7 @@ class RepositoryTestCase(unittest.TestCase):
         quiz = slidow.Quiz("quiz1", title, [question])
 
         kv_store: dict[str, dict] = {}
-        repo = repos.QuizKeyValRepo(kv_store)
+        repo = adapters.QuizKeyValRepo(kv_store)
 
         repo.add(quiz)
 
@@ -118,7 +124,7 @@ class RepositoryTestCase(unittest.TestCase):
 
         key_value_store: dict[str, dict] = {"quizzes": {"quiz1": quiz}}
 
-        repo = repos.QuizKeyValRepo(key_value_store)
+        repo = adapters.QuizKeyValRepo(key_value_store)
         retrieved_quiz = repo.get("quiz1")
 
         self.assertEqual(retrieved_quiz, quiz)
