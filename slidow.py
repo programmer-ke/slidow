@@ -1,14 +1,14 @@
 """The domain model"""
 
 import typing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
+@dataclass
 class Event:
-    def __init__(self, identifier: str, name: str) -> None:
-        self.identifier = identifier
-        self.name = name
-        self.quizzes: list["Quiz"] = []
+    identifier: str
+    name: str
+    quizzes: list["Quiz"] = field(default_factory=list)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Event):

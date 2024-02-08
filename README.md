@@ -26,3 +26,4 @@ Virtual interactions
 - [x] add black + mypy
 - [x] figure out mypy and tests setup 
 - [x] modify domain to have non-optional child attributes
+- [ ] integrate sqlalchemy, flask and get a web ui
