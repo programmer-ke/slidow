@@ -1,7 +1,16 @@
 import unittest
 
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+
 import adapters
+import orm
 import slidow
+
+Session = sessionmaker()
+
+engine = create_engine("sqlite:///:memory:")
+orm.mapper_registry.metadata.create_all(engine)
 
 
 class EventTestCase(unittest.TestCase):
@@ -76,7 +85,43 @@ class OptionTestCase(unittest.TestCase):
         self.assertTrue(option.correct)
 
 
-class RepositoryTestCase(unittest.TestCase):
+class SQLAlchemyRepositoryTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.connection = engine.connect()
+
+        # begin a non-orm transaction
+        self.transaction = self.connection.begin()
+
+        # join transaction with savepoint (nested session)
+        # any calls to Session.rollback will reset to savepoint
+        self.session = Session(
+            bind=self.connection, join_transaction_mode="create_savepoint"
+        )
+
+    def tearDown(self):
+        self.session.close()
+
+        # rollback everything including
+        # calls to Session.commit
+        self.transaction.rollback()
+        self.connection.close()
+
+    def test_can_save_an_event(self):
+
+        event = slidow.Event("event1", "Friday Funday")
+        repo = adapters.EventSQLAlchemyRepo(self.session)
+
+        repo.add(event)
+        self.session.commit()
+
+        result = self.session.execute(text('SELECT identifier, name FROM "event"'))
+
+        rows = list(result)
+        self.assertEqual(rows, [("event1", "Friday Funday")])
+
+
+class KeyValRepositoryTestCase(unittest.TestCase):
 
     def test_can_save_an_event(self):
         key_value_store: dict[str, dict] = {}

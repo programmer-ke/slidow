@@ -6,29 +6,45 @@ TODO: Consider some refactoring and use of the protocol type for repos
 import slidow
 
 
-class EventKeyValRepo:
+class KeyValRepo:
+    table_name: str
+
     def __init__(self, kv_store: dict) -> None:
-        if not "events" in kv_store:
-            kv_store["events"] = {}
+        if not self.table_name in kv_store:
+            kv_store[self.table_name] = {}
         self.kv_store = kv_store
+
+    def _add(self, key, val):
+        self.kv_store[self.table_name][key] = val
+
+    def _get(self, key):
+        return self.kv_store[self.table_name][key]
+
+
+class EventKeyValRepo(KeyValRepo):
+    table_name: str = "events"
 
     def add(self, event: slidow.Event) -> None:
-        self.kv_store["events"][event.identifier] = event
+        self._add(event.identifier, event)
 
     def get(self, event_id: str) -> slidow.Event:
-        events = self.kv_store["events"]
-        return events[event_id]
+        return self._get(event_id)
 
 
-class QuizKeyValRepo:
-    def __init__(self, kv_store: dict) -> None:
-        if not "quizzes" in kv_store:
-            kv_store["quizzes"] = {}
-        self.kv_store = kv_store
+class QuizKeyValRepo(KeyValRepo):
+    table_name: str = "quizzes"
 
     def add(self, quiz: slidow.Quiz) -> None:
-        self.kv_store["quizzes"][quiz.identifier] = quiz
+        self._add(quiz.identifier, quiz)
 
     def get(self, quiz_id: str) -> slidow.Quiz:
-        quizzes = self.kv_store["quizzes"]
-        return quizzes[quiz_id]
+        return self._get(quiz_id)
+
+
+class EventSQLAlchemyRepo:
+
+    def __init__(self, session) -> None:
+        self.session = session
+
+    def add(self, event: slidow.Event) -> None:
+        self.session.add(event)
