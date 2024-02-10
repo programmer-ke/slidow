@@ -1,6 +1,6 @@
 import unittest
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, event
 from sqlalchemy.orm import sessionmaker
 
 import adapters
@@ -10,6 +10,22 @@ import slidow
 Session = sessionmaker()
 
 engine = create_engine("sqlite:///:memory:")
+
+# The following event listeners are workarounds
+# to pysqlite's bugs that prevent proper
+# transaction handling
+@event.listens_for(engine, "connect")
+def do_connect(dbapi_connection, connection_record):
+    # disable pysqlite's emitting of the BEGIN statement entirely.
+    # also stops it from emitting COMMIT before any DDL.
+    dbapi_connection.isolation_level = None
+
+@event.listens_for(engine, "begin")
+def do_begin(conn):
+    # emit our own BEGIN
+    conn.exec_driver_sql("BEGIN")
+
+
 orm.mapper_registry.metadata.create_all(engine)
 
 
@@ -129,7 +145,121 @@ class SQLAlchemyRepositoryTestCase(unittest.TestCase):
 
         self.assertEqual(retrieved_event, event)
 
-    def insert_event(self, session: Session, identifier, name) -> int:
+    def test_can_save_a_quiz(self):
+        quiz = self.create_quiz()
+
+        repo = adapters.QuizSQLAlchemyRepo(self.session)
+
+        repo.add(quiz)
+        self.session.commit()
+
+        result = self.session.execute(text('SELECT identifier, title FROM "quiz"'))
+        rows = list(result)
+        self.assertEqual(rows, [(quiz.identifier, quiz.title)])
+
+        question = quiz.questions[0]
+        result = self.session.execute(text('SELECT text FROM "question"'))
+        rows = list(result)
+        self.assertEqual(rows, [(question.text,)])
+
+        option1, option2 = question.options
+        result = self.session.execute(text('SELECT text, correct FROM "option"'))
+        rows = list(result)
+        self.assertEqual(
+            rows, [(option1.text, option1.correct), (option2.text, option2.correct)]
+        )
+
+    def test_can_get_a_quiz(self):
+
+        quiz = self.create_quiz()
+        [question] = quiz.questions
+        option1, option2 = question.options
+
+        quiz_id = self.insert_quiz(self.session, quiz.identifier, quiz.title)
+        question_id = self.insert_question(self.session, quiz_id, question.text)
+        self.insert_option(self.session, question_id, option1.text, option1.correct)
+        self.insert_option(self.session, question_id, option2.text, option2.correct)
+
+        repo = adapters.QuizSQLAlchemyRepo(self.session)
+        retrieved_quiz = repo.get(quiz.identifier)
+
+        self.assertEqual(retrieved_quiz, quiz)
+        self.assertEqual(retrieved_quiz.questions, quiz.questions)
+
+    def test_can_save_event_quiz(self):
+
+        quiz = self.create_quiz()
+        event = slidow.Event("event1", "Friday Funday", quizzes=[quiz])
+        repo = adapters.EventSQLAlchemyRepo(self.session)
+
+        repo.add(event)
+        self.session.commit()
+
+        result = self.session.execute(text('SELECT identifier, name FROM "event"'))
+        rows = list(result)
+        self.assertEqual(rows, [("event1", "Friday Funday")])
+
+        result = self.session.execute(text('SELECT identifier, title FROM "quiz"'))
+        rows = list(result)
+        self.assertEqual(rows, [(quiz.identifier, quiz.title)])
+
+        question = quiz.questions[0]
+        result = self.session.execute(text('SELECT text FROM "question"'))
+        rows = list(result)
+        self.assertEqual(rows, [(question.text,)])
+
+        option1, option2 = question.options
+        result = self.session.execute(text('SELECT text, correct FROM "option"'))
+        rows = list(result)
+        self.assertEqual(
+            rows, [(option1.text, option1.correct), (option2.text, option2.correct)]
+        )
+
+    def create_quiz(self):
+        option1 = slidow.Option("yes")
+        option2 = slidow.Option("no", correct=True)
+
+        question_text = "Is Bitcoin Dead?"
+        question = slidow.Question(question_text, [option1, option2])
+
+        return slidow.Quiz("quiz1", "warmup quiz", questions=[question])
+
+    def insert_quiz(self, session, identifier, title) -> int:
+        session.execute(
+            text("INSERT INTO quiz (identifier, title) VALUES (:identifier, :title)"),
+            dict(identifier=identifier, title=title),
+        )
+        [(quiz_id,)] = session.execute(
+            text("SELECT id FROM quiz WHERE identifier=:identifier"),
+            {"identifier": identifier},
+        )
+        return quiz_id
+
+    def insert_question(self, session, quiz_id, question_text) -> int:
+        session.execute(
+            text("INSERT INTO question (quiz_id, text) VALUES (:quiz_id, :text)"),
+            dict(quiz_id=quiz_id, text=question_text),
+        )
+        [(question_id,)] = session.execute(
+            text("SELECT id FROM question WHERE quiz_id=:quiz_id"),
+            {"quiz_id": quiz_id},
+        )
+        return question_id
+
+    def insert_option(self, session, question_id, option_text, correct) -> int:
+        session.execute(
+            text(
+                "INSERT INTO option (question_id, text, correct) VALUES (:question_id, :text, :correct)"
+            ),
+            dict(question_id=question_id, text=option_text, correct=correct),
+        )
+        [(option_id,)] = session.execute(
+            text("SELECT id FROM option WHERE text=:text"),
+            {"text": option_text},
+        )
+        return option_id
+
+    def insert_event(self, session, identifier, name) -> int:
         session.execute(
             text("insert into event (identifier, name)" " values (:identifier, :name)"),
             dict(identifier=identifier, name=name),
