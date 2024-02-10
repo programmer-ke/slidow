@@ -17,9 +17,16 @@ quizzes_table = Table(
     "quiz",
     mapper_registry.metadata,
     Column("id", Integer, primary_key=True),
-    Column("event_id", Integer, ForeignKey("event.id")),
     Column("identifier", Text),
     Column("title", Text),
+)
+
+event_quiz_table = Table(
+    "event_quiz",
+    mapper_registry.metadata,
+    Column("id", Integer, primary_key=True),
+    Column("event_id", ForeignKey("event.id")),
+    Column("quiz_id", ForeignKey("quiz.id")),
 )
 
 questions_table = Table(
@@ -42,7 +49,7 @@ options_table = Table(
 mapper_registry.map_imperatively(
     slidow.Event,
     events_table,
-    properties={"quizzes": relationship(slidow.Quiz, backref="event")},
+    properties={"quizzes": relationship(slidow.Quiz, secondary=event_quiz_table)},
 )
 
 mapper_registry.map_imperatively(

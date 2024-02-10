@@ -48,3 +48,6 @@ class EventSQLAlchemyRepo:
 
     def add(self, event: slidow.Event) -> None:
         self.session.add(event)
+
+    def get(self, identifier: str) -> slidow.Event:
+        return self.session.query(slidow.Event).filter_by(identifier=identifier).one()

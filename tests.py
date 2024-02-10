@@ -120,6 +120,26 @@ class SQLAlchemyRepositoryTestCase(unittest.TestCase):
         rows = list(result)
         self.assertEqual(rows, [("event1", "Friday Funday")])
 
+    def test_can_get_an_event(self):
+
+        event = slidow.Event("event1", "Friday Hangout")
+        self.insert_event(self.session, event.identifier, event.name)
+        repo = adapters.EventSQLAlchemyRepo(self.session)
+        retrieved_event = repo.get("event1")
+
+        self.assertEqual(retrieved_event, event)
+
+    def insert_event(self, session: Session, identifier, name) -> int:
+        session.execute(
+            text("insert into event (identifier, name)" " values (:identifier, :name)"),
+            dict(identifier=identifier, name=name),
+        )
+        (event_id,) = session.execute(
+            text("select id from event" " where identifier=:identifier"),
+            {"identifier": identifier},
+        )
+        return event_id
+
 
 class KeyValRepositoryTestCase(unittest.TestCase):
 
