@@ -1,6 +1,6 @@
 import unittest
 
-from sqlalchemy import create_engine, text, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker
 
 import adapters
@@ -11,6 +11,7 @@ Session = sessionmaker()
 
 engine = create_engine("sqlite:///:memory:")
 
+
 # The following event listeners are workarounds
 # to pysqlite's bugs that prevent proper
 # transaction handling
@@ -19,6 +20,7 @@ def do_connect(dbapi_connection, connection_record):
     # disable pysqlite's emitting of the BEGIN statement entirely.
     # also stops it from emitting COMMIT before any DDL.
     dbapi_connection.isolation_level = None
+
 
 @event.listens_for(engine, "begin")
 def do_begin(conn):

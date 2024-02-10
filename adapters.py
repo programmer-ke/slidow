@@ -52,6 +52,7 @@ class EventSQLAlchemyRepo:
     def get(self, identifier: str) -> slidow.Event:
         return self.session.query(slidow.Event).filter_by(identifier=identifier).one()
 
+
 class QuizSQLAlchemyRepo:
 
     def __init__(self, session) -> None:
