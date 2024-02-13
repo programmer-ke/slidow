@@ -61,6 +61,7 @@ class EventSQLAlchemyRepo:
     def list(self) -> Iterable[slidow.Event]:
         return self.session.query(slidow.Event).all()
 
+
 class QuizSQLAlchemyRepo:
 
     def __init__(self, session) -> None:

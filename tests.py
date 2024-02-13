@@ -160,7 +160,6 @@ class SQLAlchemyRepositoryTestCase(unittest.TestCase):
         self.assertTrue(event1 in retrieved_events)
         self.assertTrue(event2 in retrieved_events)
 
-
     def test_can_save_a_quiz(self):
         quiz = self.create_quiz()
 
@@ -313,7 +312,9 @@ class KeyValRepositoryTestCase(unittest.TestCase):
         event1 = slidow.Event("event1", "Friday Hangout")
         event2 = slidow.Event("event2", "Happy Hour Quiz")
 
-        key_value_store: dict[str, dict] = {"events": {"event1": event1, "event2": event2}}
+        key_value_store: dict[str, dict] = {
+            "events": {"event1": event1, "event2": event2}
+        }
 
         repo = adapters.EventKeyValRepo(key_value_store)
         retrieved_events = repo.list()
