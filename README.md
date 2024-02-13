@@ -29,3 +29,4 @@ Virtual interactions
 - [ ] integrate sqlalchemy, flask and get a web ui
   - [x] add orm tests following recipe: https://docs.sqlalchemy.org/en/20/orm/session_transaction.html#joining-a-session-into-an-external-transaction-such-as-for-test-suites
   - [x] fix mypy hanging
+  - [ ] Add an endpoint that lists events

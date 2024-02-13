@@ -147,6 +147,20 @@ class SQLAlchemyRepositoryTestCase(unittest.TestCase):
 
         self.assertEqual(retrieved_event, event)
 
+    def test_can_get_an_event_list(self):
+
+        event1 = slidow.Event("event1", "Friday Hangout")
+        event2 = slidow.Event("event2", "Happy Hour")
+        self.insert_event(self.session, event1.identifier, event1.name)
+        self.insert_event(self.session, event2.identifier, event2.name)
+        repo = adapters.EventSQLAlchemyRepo(self.session)
+
+        retrieved_events = repo.list()
+
+        self.assertTrue(event1 in retrieved_events)
+        self.assertTrue(event2 in retrieved_events)
+
+
     def test_can_save_a_quiz(self):
         quiz = self.create_quiz()
 
@@ -294,6 +308,18 @@ class KeyValRepositoryTestCase(unittest.TestCase):
         retrieved_event = repo.get("event1")
 
         self.assertEqual(retrieved_event, event)
+
+    def test_can_get_list_of_events(self):
+        event1 = slidow.Event("event1", "Friday Hangout")
+        event2 = slidow.Event("event2", "Happy Hour Quiz")
+
+        key_value_store: dict[str, dict] = {"events": {"event1": event1, "event2": event2}}
+
+        repo = adapters.EventKeyValRepo(key_value_store)
+        retrieved_events = repo.list()
+
+        self.assertTrue(event1 in retrieved_events)
+        self.assertTrue(event2 in retrieved_events)
 
     def test_can_save_a_quiz(self):
         text = "What is trending most on X?"

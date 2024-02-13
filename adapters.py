@@ -1,7 +1,6 @@
-"""Repositories module
+"""Adapters"""
 
-TODO: Consider some refactoring and use of the protocol type for repos
-"""
+from typing import Iterable
 
 import slidow
 
@@ -20,6 +19,10 @@ class KeyValRepo:
     def _get(self, key):
         return self.kv_store[self.table_name][key]
 
+    def _list(self):
+        table = self.kv_store[self.table_name]
+        return [table[key] for key in table]
+
 
 class EventKeyValRepo(KeyValRepo):
     table_name: str = "events"
@@ -29,6 +32,9 @@ class EventKeyValRepo(KeyValRepo):
 
     def get(self, event_id: str) -> slidow.Event:
         return self._get(event_id)
+
+    def list(self) -> Iterable[slidow.Event]:
+        return self._list()
 
 
 class QuizKeyValRepo(KeyValRepo):
@@ -52,6 +58,8 @@ class EventSQLAlchemyRepo:
     def get(self, identifier: str) -> slidow.Event:
         return self.session.query(slidow.Event).filter_by(identifier=identifier).one()
 
+    def list(self) -> Iterable[slidow.Event]:
+        return self.session.query(slidow.Event).all()
 
 class QuizSQLAlchemyRepo:
 
