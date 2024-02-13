@@ -3,8 +3,8 @@ import unittest
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker
 
-from adapters import orm, repos
-import slidow
+from slidow import models
+from slidow.adapters import orm, repos
 
 Session = sessionmaker()
 
@@ -54,7 +54,7 @@ class SQLAlchemyRepositoryTestCase(unittest.TestCase):
 
     def test_can_save_an_event(self):
 
-        event = slidow.Event("event1", "Friday Funday")
+        event = models.Event("event1", "Friday Funday")
         repo = repos.EventSQLAlchemyRepo(self.session)
 
         repo.add(event)
@@ -67,7 +67,7 @@ class SQLAlchemyRepositoryTestCase(unittest.TestCase):
 
     def test_can_get_an_event(self):
 
-        event = slidow.Event("event1", "Friday Hangout")
+        event = models.Event("event1", "Friday Hangout")
         self.insert_event(self.session, event.identifier, event.name)
         repo = repos.EventSQLAlchemyRepo(self.session)
         retrieved_event = repo.get("event1")
@@ -76,8 +76,8 @@ class SQLAlchemyRepositoryTestCase(unittest.TestCase):
 
     def test_can_get_an_event_list(self):
 
-        event1 = slidow.Event("event1", "Friday Hangout")
-        event2 = slidow.Event("event2", "Happy Hour")
+        event1 = models.Event("event1", "Friday Hangout")
+        event2 = models.Event("event2", "Happy Hour")
         self.insert_event(self.session, event1.identifier, event1.name)
         self.insert_event(self.session, event2.identifier, event2.name)
         repo = repos.EventSQLAlchemyRepo(self.session)
@@ -131,7 +131,7 @@ class SQLAlchemyRepositoryTestCase(unittest.TestCase):
     def test_can_save_event_quiz(self):
 
         quiz = self.create_quiz()
-        event = slidow.Event("event1", "Friday Funday", quizzes=[quiz])
+        event = models.Event("event1", "Friday Funday", quizzes=[quiz])
         repo = repos.EventSQLAlchemyRepo(self.session)
 
         repo.add(event)
@@ -158,13 +158,13 @@ class SQLAlchemyRepositoryTestCase(unittest.TestCase):
         )
 
     def create_quiz(self):
-        option1 = slidow.Option("yes")
-        option2 = slidow.Option("no", correct=True)
+        option1 = models.Option("yes")
+        option2 = models.Option("no", correct=True)
 
         question_text = "Is Bitcoin Dead?"
-        question = slidow.Question(question_text, [option1, option2])
+        question = models.Question(question_text, [option1, option2])
 
-        return slidow.Quiz("quiz1", "warmup quiz", questions=[question])
+        return models.Quiz("quiz1", "warmup quiz", questions=[question])
 
     def insert_quiz(self, session, identifier, title) -> int:
         session.execute(
@@ -218,7 +218,7 @@ class KeyValRepositoryTestCase(unittest.TestCase):
     def test_can_save_an_event(self):
         key_value_store: dict[str, dict] = {}
         repo = repos.EventKeyValRepo(key_value_store)
-        event = slidow.Event("event1", "Friday Hangout")
+        event = models.Event("event1", "Friday Hangout")
 
         repo.add(event)
 
@@ -226,7 +226,7 @@ class KeyValRepositoryTestCase(unittest.TestCase):
         self.assertEqual(events["event1"], event)
 
     def test_can_get_an_event(self):
-        event = slidow.Event("event1", "Friday Hangout")
+        event = models.Event("event1", "Friday Hangout")
 
         key_value_store: dict[str, dict] = {"events": {"event1": event}}
 
@@ -236,8 +236,8 @@ class KeyValRepositoryTestCase(unittest.TestCase):
         self.assertEqual(retrieved_event, event)
 
     def test_can_get_list_of_events(self):
-        event1 = slidow.Event("event1", "Friday Hangout")
-        event2 = slidow.Event("event2", "Happy Hour Quiz")
+        event1 = models.Event("event1", "Friday Hangout")
+        event2 = models.Event("event2", "Happy Hour Quiz")
 
         key_value_store: dict[str, dict] = {
             "events": {"event1": event1, "event2": event2}
@@ -251,11 +251,11 @@ class KeyValRepositoryTestCase(unittest.TestCase):
 
     def test_can_save_a_quiz(self):
         text = "What is trending most on X?"
-        option1 = slidow.Option(text="Bitcoin ETF", correct=True)
-        option2 = slidow.Option(text="Elon Musk")
-        question = slidow.Question(text, [option1, option2])
+        option1 = models.Option(text="Bitcoin ETF", correct=True)
+        option2 = models.Option(text="Elon Musk")
+        question = models.Question(text, [option1, option2])
         title = "warmup quiz"
-        quiz = slidow.Quiz("quiz1", title, [question])
+        quiz = models.Quiz("quiz1", title, [question])
 
         kv_store: dict[str, dict] = {}
         repo = repos.QuizKeyValRepo(kv_store)
@@ -267,11 +267,11 @@ class KeyValRepositoryTestCase(unittest.TestCase):
 
     def test_can_get_a_quiz(self):
         text = "What is trending most on X?"
-        option1 = slidow.Option(text="Bitcoin ETF", correct=True)
-        option2 = slidow.Option(text="Elon Musk")
-        question = slidow.Question(text, [option1, option2])
+        option1 = models.Option(text="Bitcoin ETF", correct=True)
+        option2 = models.Option(text="Elon Musk")
+        question = models.Question(text, [option1, option2])
         title = "warmup quiz"
-        quiz = slidow.Quiz("quiz1", title, [question])
+        quiz = models.Quiz("quiz1", title, [question])
 
         key_value_store: dict[str, dict] = {"quizzes": {"quiz1": quiz}}
 

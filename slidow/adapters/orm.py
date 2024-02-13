@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, Table, Text
 from sqlalchemy.orm import registry, relationship
 
-import slidow
+from slidow import models
 
 mapper_registry = registry()
 
@@ -47,24 +47,24 @@ options_table = Table(
 )
 
 mapper_registry.map_imperatively(
-    slidow.Event,
+    models.Event,
     events_table,
-    properties={"quizzes": relationship(slidow.Quiz, secondary=event_quiz_table)},
+    properties={"quizzes": relationship(models.Quiz, secondary=event_quiz_table)},
 )
 
 mapper_registry.map_imperatively(
-    slidow.Quiz,
+    models.Quiz,
     quizzes_table,
-    properties={"questions": relationship(slidow.Question, backref="quiz")},
+    properties={"questions": relationship(models.Question, backref="quiz")},
 )
 
 mapper_registry.map_imperatively(
-    slidow.Question,
+    models.Question,
     questions_table,
-    properties={"options": relationship(slidow.Option, backref="question")},
+    properties={"options": relationship(models.Option, backref="question")},
 )
 
 mapper_registry.map_imperatively(
-    slidow.Option,
+    models.Option,
     options_table,
 )

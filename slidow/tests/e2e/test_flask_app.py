@@ -1,6 +1,6 @@
 import unittest
 
-from entrypoints.flask_app import create_app
+from slidow.entrypoints.flask_app import create_app
 
 
 class FlaskAppTestCase(unittest.TestCase):
