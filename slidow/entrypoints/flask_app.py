@@ -1,10 +1,11 @@
 import os
 
+import click
 from flask import Blueprint, Flask, current_app, g
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from slidow.adapters import repos
+from slidow.adapters import orm, repos
 
 slidow_bp = Blueprint("slidow", __name__)
 
@@ -35,6 +36,18 @@ def close_db(e=None):
     Session.remove()
 
 
+def init_db():
+    Session = get_db_session()
+    engine = Session.get_bind()
+    orm.mapper_registry.metadata.create_all(engine)
+
+
+@click.command("init-db")
+def init_db_command():
+    init_db()
+    click.echo("Initialized the DB")
+
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
@@ -61,4 +74,5 @@ def create_app(test_config=None):
     # register callbacks etc..
     app.register_blueprint(slidow_bp)
     app.teardown_appcontext(close_db)
+    app.cli.add_command(init_db_command)
     return app
