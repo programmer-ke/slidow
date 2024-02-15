@@ -1,7 +1,7 @@
 import os
 
 import click
-from flask import Blueprint, Flask, current_app, g
+from flask import Blueprint, Flask, current_app, g, render_template
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -20,7 +20,7 @@ def events_list():
     session = get_db_session()
     events_repo = repos.EventSQLAlchemyRepo(session)
     events = events_repo.list()
-    return " ".join([event.name for event in events])
+    return render_template('events.html', events=events)
 
 
 def get_db_session():

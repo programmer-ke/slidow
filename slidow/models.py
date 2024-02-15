@@ -1,4 +1,4 @@
-"""The domain model"""
+"""These are the slidow entities with related methods"""
 
 import typing
 from dataclasses import dataclass, field
