@@ -9,41 +9,41 @@ events_table = Table(
     "event",
     mapper_registry.metadata,
     Column("id", Integer, primary_key=True),
-    Column("identifier", Text),
-    Column("name", Text),
+    Column("identifier", Text, nullable=False),
+    Column("name", Text, nullable=False),
 )
 
 quizzes_table = Table(
     "quiz",
     mapper_registry.metadata,
     Column("id", Integer, primary_key=True),
-    Column("identifier", Text),
-    Column("title", Text),
+    Column("identifier", Text, nullable=False),
+    Column("title", Text, nullable=False),
 )
 
 event_quiz_table = Table(
     "event_quiz",
     mapper_registry.metadata,
     Column("id", Integer, primary_key=True),
-    Column("event_id", ForeignKey("event.id")),
-    Column("quiz_id", ForeignKey("quiz.id")),
+    Column("event_id", ForeignKey("event.id"), nullable=False),
+    Column("quiz_id", ForeignKey("quiz.id"), nullable=False),
 )
 
 questions_table = Table(
     "question",
     mapper_registry.metadata,
     Column("id", Integer, primary_key=True),
-    Column("quiz_id", Integer, ForeignKey("quiz.id")),
-    Column("text", Text),
+    Column("quiz_id", Integer, ForeignKey("quiz.id"), nullable=False),
+    Column("text", Text, nullable=False),
 )
 
 options_table = Table(
     "option",
     mapper_registry.metadata,
     Column("id", Integer, primary_key=True),
-    Column("question_id", Integer, ForeignKey("question.id")),
-    Column("text", Text),
-    Column("correct", Boolean),
+    Column("question_id", Integer, ForeignKey("question.id"), nullable=False),
+    Column("text", Text, nullable=False),
+    Column("correct", Boolean, nullable=False),
 )
 
 mapper_registry.map_imperatively(

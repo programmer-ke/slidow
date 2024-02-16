@@ -1,8 +1,14 @@
-"""Adapters"""
+"""Aggregate repositories"""
 
-from typing import Iterable
+import typing
 
 from slidow import models
+
+
+class AbstractRepo(typing.Protocol):
+    def add(self, model: typing.Any) -> None: ...
+
+    def get(self, id_: typing.Any) -> typing.Any: ...
 
 
 class KeyValRepo:
@@ -24,7 +30,7 @@ class KeyValRepo:
         return [table[key] for key in table]
 
 
-class EventKeyValRepo(KeyValRepo):
+class EventKeyValRepo(KeyValRepo, AbstractRepo):
     table_name: str = "events"
 
     def add(self, event: models.Event) -> None:
@@ -33,11 +39,11 @@ class EventKeyValRepo(KeyValRepo):
     def get(self, event_id: str) -> models.Event:
         return self._get(event_id)
 
-    def list(self) -> Iterable[models.Event]:
+    def list(self) -> typing.Iterable[models.Event]:
         return self._list()
 
 
-class QuizKeyValRepo(KeyValRepo):
+class QuizKeyValRepo(KeyValRepo, AbstractRepo):
     table_name: str = "quizzes"
 
     def add(self, quiz: models.Quiz) -> None:
@@ -47,7 +53,7 @@ class QuizKeyValRepo(KeyValRepo):
         return self._get(quiz_id)
 
 
-class EventSQLAlchemyRepo:
+class EventSQLAlchemyRepo(AbstractRepo):
 
     def __init__(self, session) -> None:
         self.session = session
@@ -58,11 +64,11 @@ class EventSQLAlchemyRepo:
     def get(self, identifier: str) -> models.Event:
         return self.session.query(models.Event).filter_by(identifier=identifier).one()
 
-    def list(self) -> Iterable[models.Event]:
+    def list(self) -> typing.Iterable[models.Event]:
         return self.session.query(models.Event).all()
 
 
-class QuizSQLAlchemyRepo:
+class QuizSQLAlchemyRepo(AbstractRepo):
 
     def __init__(self, session) -> None:
         self.session = session

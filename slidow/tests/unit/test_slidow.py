@@ -27,6 +27,13 @@ class EventTestCase(unittest.TestCase):
 
         self.assertEqual(event.quizzes, [])
 
+    def test_can_generate_new_identifiers(self):
+        event_name = "Last Friday"
+        event1 = models.Event.with_random_identifier(event_name)
+        event2 = models.Event.with_random_identifier(event_name)
+        self.assertEqual(event1.name, event2.name)
+        self.assertNotEqual(event1.identifier, event2.identifier)
+
 
 class QuizTestCase(unittest.TestCase):
 

@@ -1,10 +1,21 @@
 import os
 
 import click
-from flask import Blueprint, Flask, current_app, g, render_template
+from flask import (
+    Blueprint,
+    Flask,
+    current_app,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+from slidow import services
 from slidow.adapters import orm, repos
 
 slidow_bp = Blueprint("slidow", __name__)
@@ -15,12 +26,23 @@ def root():
     return "<p> Welcome to slidow!</p>"
 
 
-@slidow_bp.route("/events", methods=("GET",))
+@slidow_bp.route("/events", methods=("GET", "POST"))
 def events_list():
     session = get_db_session()
     events_repo = repos.EventSQLAlchemyRepo(session)
+    status_code: int = 200
+
+    if request.method == "POST":
+        event_name = request.form.get("name")
+        if event_name:
+            services.add_event(event_name, session, events_repo)
+            return redirect(url_for("slidow.events_list"))
+
+        flash("Event name is required", "error")
+        status_code = 400
+
     events = events_repo.list()
-    return render_template('events.html', events=events)
+    return render_template("events.html", events=events), status_code
 
 
 def get_db_session():

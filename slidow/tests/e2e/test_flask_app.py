@@ -1,6 +1,6 @@
 import unittest
 
-from sqlalchemy import text
+from sqlalchemy import text as T
 
 from slidow.adapters import orm
 from slidow.entrypoints.flask_app import create_app
@@ -31,11 +31,11 @@ class FlaskAppTestCase(unittest.TestCase):
 
     def insert_event(self, session, identifier, name) -> int:
         session.execute(
-            text("insert into event (identifier, name)" " values (:identifier, :name)"),
+            T("insert into event (identifier, name)" " values (:identifier, :name)"),
             dict(identifier=identifier, name=name),
         )
         (event_id,) = session.execute(
-            text("select id from event" " where identifier=:identifier"),
+            T("select id from event" " where identifier=:identifier"),
             {"identifier": identifier},
         )
         return event_id
@@ -58,6 +58,20 @@ class FlaskAppTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Event1", response.text)
         self.assertIn("Event2", response.text)
+
+    def test_can_add_an_event(self):
+
+        response = self.client.post("/events", data={"name": "Event1"})
+        self.assertEqual(response.status_code, 302)
+
+        result = self.session.execute(T('SELECT identifier, name FROM "event"'))
+        [(identifier, name)] = list(result)
+        self.assertEqual(name, "Event1")
+
+    def test_must_specify_event_name(self):
+
+        response = self.client.post("/events")
+        self.assertEqual(response.status_code, 400)
 
 
 if __name__ == "__main__":
