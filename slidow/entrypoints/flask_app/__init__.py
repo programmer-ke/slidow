@@ -34,11 +34,15 @@ def events_list():
 
     if request.method == "POST":
         event_name = request.form.get("name")
-        if event_name:
-            services.add_event(event_name, session, events_repo)
-            return redirect(url_for("slidow.events_list"))
-
-        flash("Event name is required", "error")
+        if event_name is not None:
+            try:
+                services.add_event(event_name, session, events_repo)
+            except services.InvalidEventNameError as err:
+                flash(err.msg)
+            else:
+                return redirect(url_for("slidow.events_list"))
+        else:
+            flash("Event name is required", "error")
         status_code = 400
 
     events = events_repo.list()
