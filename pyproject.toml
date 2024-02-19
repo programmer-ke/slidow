@@ -1,2 +1,5 @@
 [tool.mypy]
 check_untyped_defs = true
+
+[tool.isort]
+profile = "black"
