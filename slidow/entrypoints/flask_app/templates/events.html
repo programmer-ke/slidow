@@ -10,8 +10,8 @@
     <button type="submit">Add New Event</button>
   </form>
   <ul>
-  {% for event in events %}
-  <li> {{ event.identifier }}: {{ event.name }}
+  {% for identifier, name in events %}
+  <li> {{ identifier }}: {{ name }}
   {% endfor %}
   </ul>
 {% endblock %}

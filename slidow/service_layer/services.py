@@ -22,3 +22,7 @@ def add_event(event_name: str, uow: unit_of_work.AbstractUOW) -> str:
         uow.events.add(event)
         uow.commit()
     return event.identifier
+
+
+def get_events(repo: AbstractRepo) -> list[tuple]:
+    return [(event.identifier, event.name) for event in repo.list()]

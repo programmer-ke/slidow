@@ -10,6 +10,8 @@ class AbstractRepo(typing.Protocol):
 
     def get(self, id_: typing.Any) -> typing.Any: ...
 
+    def list(self) -> typing.Any: ...
+
 
 class KeyValRepo:
     table_name: str
@@ -52,6 +54,9 @@ class QuizKeyValRepo(KeyValRepo, AbstractRepo):
     def get(self, quiz_id: str) -> models.Quiz:
         return self._get(quiz_id)
 
+    def list(self) -> typing.Iterable[models.Quiz]:
+        return self._list()
+
 
 class EventSQLAlchemyRepo(AbstractRepo):
 
@@ -78,3 +83,6 @@ class QuizSQLAlchemyRepo(AbstractRepo):
 
     def get(self, identifier: str) -> models.Quiz:
         return self.session.query(models.Quiz).filter_by(identifier=identifier).one()
+
+    def list(self) -> typing.Iterable[models.Quiz]:
+        return self.session.query(models.Quiz).all()

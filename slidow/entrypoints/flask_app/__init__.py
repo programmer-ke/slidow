@@ -49,7 +49,7 @@ def events_list():
 
     session = get_db_session()
     events_repo = repos.EventSQLAlchemyRepo(session)
-    events = events_repo.list()
+    events = services.get_events(events_repo)
     return render_template("events.html", events=events), status_code
 
 
