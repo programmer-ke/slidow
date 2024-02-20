@@ -35,6 +35,30 @@ class SQLAlchemyUOWTestCase(unittest.TestCase):
         self.assertEqual(identifier, "event1")
         self.assertEqual(name, "Event1")
 
+    def test_uncommitted_transactions_not_persisted(self):
+
+        with unit_of_work.SQLAlchemyUOW(self.session_factory) as uow:
+            uow.events.add(models.Event("event1", "Event1"))
+
+        new_session = self.session_factory()
+        results = list(new_session.execute(T("SELECT * FROM event")))
+        self.assertEqual(results, [])
+
+    def test_raised_exception_causes_rollback(self):
+
+        class MyException(Exception):
+            pass
+
+        with self.assertRaises(MyException):
+            with unit_of_work.SQLAlchemyUOW(self.session_factory) as uow:
+                uow.events.add(models.Event("event1", "Event1"))
+                raise MyException()
+                uow.commit()
+
+        new_session = self.session_factory()
+        results = list(new_session.execute(T("SELECT * FROM event")))
+        self.assertEqual(results, [])
+
 
 if __name__ == "__main__":
     unittest.main()
