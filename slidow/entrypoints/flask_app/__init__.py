@@ -15,8 +15,8 @@ from flask import (
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from slidow import services
 from slidow.adapters import orm, repos
+from slidow.service_layer import services, unit_of_work
 
 slidow_bp = Blueprint("slidow", __name__)
 
@@ -28,15 +28,17 @@ def root():
 
 @slidow_bp.route("/events", methods=("GET", "POST"))
 def events_list():
-    session = get_db_session()
-    events_repo = repos.EventSQLAlchemyRepo(session)
+
     status_code: int = 200
+
+    session_factory = get_db_session_factory()
 
     if request.method == "POST":
         event_name = request.form.get("name")
         if event_name is not None:
+            sqlalchemy_uow = unit_of_work.SQLAlchemyUOW(session_factory)
             try:
-                services.add_event(event_name, session, events_repo)
+                services.add_event(event_name, sqlalchemy_uow)
             except services.InvalidEventNameError as err:
                 flash(err.msg)
             else:
@@ -45,6 +47,8 @@ def events_list():
             flash("Event name is required", "error")
         status_code = 400
 
+    session = get_db_session()
+    events_repo = repos.EventSQLAlchemyRepo(session)
     events = events_repo.list()
     return render_template("events.html", events=events), status_code
 
@@ -54,6 +58,10 @@ def get_db_session():
         Session = current_app.config["DB_SESSION_FACTORY"]
         g.db_session = Session()
     return g.db_session
+
+
+def get_db_session_factory():
+    return current_app.config["DB_SESSION_FACTORY"]
 
 
 def close_db(e=None):
@@ -88,7 +96,7 @@ def create_app(test_config=None):
 
     # Create a scoped session factory for use in views
     db_engine = create_engine("sqlite:///" + app.config["DATABASE"])
-    Session = scoped_session(sessionmaker(bind=db_engine))
+    Session = scoped_session(sessionmaker(bind=db_engine, expire_on_commit=False))
     app.config.from_mapping(DB_SESSION_FACTORY=Session)
 
     # create instance folder in dev
